@@ -271,48 +271,48 @@ group-project/
 
 ```mermaid
 flowchart LR
-    subgraph R08["🧑 Roll 08 — Protocol Lead: BOOTP + Infra"]
+    subgraph R08["🧑 Roll 08 — BOOTP + Backend & Data Engine (28%)"]
         A1["BOOTP Server & Client"]
         A2["BOOTP Packet Parser"]
-        A3["Packet Logger Module"]
-        A4["SQLite DB Layer"]
+        A3["FastAPI Core App & REST API Engine"]
+        A4["Packet Logger & SQLite DB Layer"]
     end
 
-    subgraph R11["🧑 Roll 11 — Protocol Lead: DNS"]
+    subgraph R11["🧑 Roll 11 — Protocol Lead: DNS (25%)"]
         B1["DNS Server & Client"]
         B2["DNS Packet Parser"]
         B3["Zone File Loader"]
         B4["Record Types (A/AAAA/MX/CNAME/NS)"]
     end
 
-    subgraph R14["🧑 Roll 14 — Protocol Lead: TELNET"]
+    subgraph R14["🧑 Roll 14 — Protocol Lead: TELNET (23%)"]
         C1["Telnet Server & Client"]
         C2["IAC Negotiation Engine"]
         C3["Sandboxed Command Executor"]
         C4["Authentication System"]
     end
 
-    subgraph R27["🧑 Roll 27 — Full-Stack: Visualizer + Backend"]
-        D1["FastAPI Backend + WebSocket"]
+    subgraph R27["🧑 Roll 27 — Frontend Visualizer & WebSockets (24%)"]
+        D1["WebSocket Live Event Streaming"]
         D2["Web Dashboard UI"]
-        D3["Packet Visualizer + Header Decoder"]
+        D3["Packet Visualizer & Header Decoder"]
         D4["xterm.js Terminal Integration"]
     end
 ```
 
 ### Detailed Task Breakdown
 
-#### 🧑 Roll 08 — BOOTP + Infrastructure (Days 1–10)
+#### 🧑 Roll 08 — BOOTP + Backend & Data Engine (Days 1–10)
 
 | Day | Task | Deliverable |
 |-----|------|-------------|
-| 1–2 | Study RFC 951, understand BOOTP packet format | Notes + packet struct diagram |
-| 3–4 | Implement `packet.py` (build/parse BOOTP messages) | Working packet encoder/decoder |
-| 5–6 | Implement `server.py` (UDP listener, IP pool management) | Server that replies to requests |
-| 7 | Implement `client.py` (send BOOTREQUEST, parse BOOTREPLY) | Working client-server exchange |
-| 8 | Build `packet_logger.py` + SQLite layer | All protocols can log packets |
-| 9 | Write tests + integrate with backend API | `test_bootp.py` passing |
-| 10 | Documentation + help Roll 27 with BOOTP UI | `BOOTP.md` complete |
+| 1–2 | Study RFC 951, understand BOOTP packet format & initialize FastAPI architecture | Notes + packet struct diagram + app skeleton |
+| 3–4 | Implement `packet.py` (build/parse BOOTP messages) + DB schema setup | Working BOOTP packet encoder/decoder + SQLite models |
+| 5–6 | Implement `server.py` (UDP listener, IP pool management) + REST endpoints for BOOTP | Server that replies to requests + working BOOTP API routes |
+| 7 | Implement `client.py` (send BOOTREQUEST, parse BOOTREPLY) & protocol control APIs | Working client-server exchange + protocol start/stop APIs |
+| 8 | Build `packet_logger.py` + SQLite persistence + centralized REST API routing | Global packet capture pipeline & query endpoints ready |
+| 9 | Write tests (`test_bootp.py`), swagger API validation & backend-to-protocol bindings | All backend endpoints passing and documented |
+| 10 | Documentation (`BOOTP.md`, `architecture.md`) + backend stabilization | Complete backend docs & rock-solid API layer |
 
 #### 🧑 Roll 11 — DNS (Days 1–10)
 
@@ -338,17 +338,17 @@ flowchart LR
 | 9 | Write tests + integrate with backend API | `test_telnet.py` passing |
 | 10 | Documentation + help Roll 27 with Telnet UI | `TELNET.md` complete |
 
-#### 🧑 Roll 27 — Visualizer + Backend (Days 1–10)
+#### 🧑 Roll 27 — Frontend Visualizer & WebSockets (Days 1–10)
 
 | Day | Task | Deliverable |
 |-----|------|-------------|
-| 1–2 | Set up FastAPI project, define API routes + WebSocket endpoints | Backend skeleton running |
+| 1–2 | Set up frontend framework/structure & WebSocket client architecture | Frontend skeleton & WS connection ready |
 | 3–4 | Build Dashboard UI (protocol status, controls) | Main page with protocol cards |
 | 5–6 | Build Packet Visualizer (sequence diagrams, live updates via WS) | Real-time packet flow view |
 | 7 | Build Header Decoder (bit-level breakdown, hex dump) | Interactive header explorer |
 | 8 | Integrate xterm.js for Telnet web terminal | Working web terminal |
 | 9 | Build DNS Query Tool + BOOTP Simulator UI panels | Interactive demo tools |
-| 10 | Polish UI, responsive design, final integration | Production-ready visualizer |
+| 10 | Polish UI, responsive design, final visual integration | Production-ready visualizer |
 
 ---
 

@@ -1,0 +1,12 @@
+{
+    "server_ip": "192.168.1.1",
+    "gateway_ip": "192.168.1.1",
+    "subnet_mask": "255.255.255.0",
+    "pool_start": "192.168.1.100",
+    "pool_end": "192.168.1.200",
+    "boot_file": "pxelinux.0",
+    "static_mappings": {
+        "AA:BB:CC:DD:EE:01": "192.168.1.10",
+        "AA:BB:CC:DD:EE:02": "192.168.1.11"
+    }
+}

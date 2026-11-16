@@ -1,31 +1,31 @@
-Group 3 — Protocol Visualizer Demo & Multi-Device Runbook
+# Group 3 — Protocol Visualizer Demo & Multi-Device Runbook
 
-Protocols: BOOTP (RFC 951 · UDP 10067/10068) · DNS (RFC 1035 · UDP/TCP 10053) · TELNET (RFC 854 · TCP 2323)
+**Protocols:** BOOTP (RFC 951 · UDP `10067`/`10068`) · DNS (RFC 1035 · UDP/TCP `10053`) · TELNET (RFC 854 · TCP `2323`)  
+**Dashboard & WebSocket Port:** `8000`
 
-Dashboard & WebSocket Port: 8000
+---
 
-1. Laptop Server Setup (Run Once per Session)
+## 1. Laptop Server Setup (Run Once per Session)
 
-Check Your Laptop's Current Wi-Fi IP & Subnet Broadcast
-
+### Check Your Laptop's Current Wi-Fi IP & Subnet Broadcast
 Whenever you switch to a new Wi-Fi or mobile hotspot, run:
-
+```bash
 hostname -I                  # Use the first 192.168.x.x / 10.x.x.x IP as <LAPTOP_IP>
 ip -4 addr show | grep brd   # Shows your subnet broadcast (e.g. 192.168.29.255)
+```
 
-
-Open Firewall Ports (One-Time on Ubuntu)
-
+### Open Firewall Ports (One-Time on Ubuntu)
+```bash
 sudo ufw allow 8000/tcp
 sudo ufw allow 10067/udp
 sudo ufw allow 10068/udp
 sudo ufw allow 10053/udp
 sudo ufw allow 10053/tcp
 sudo ufw allow 2323/tcp
+```
 
-
-Start the Server (Clean State)
-
+### Start the Server (Clean State)
+```bash
 cd ~/CN-group-project
 source .venv/bin/activate
 
@@ -37,67 +37,67 @@ pkill -9 telnet-server 2>/dev/null || true
 
 # Start FastAPI + WebSockets + Roll 27 Frontend
 python3 run.py
+```
 
-
-Start All 3 Protocol Servers
-
-Open http://localhost:8000 and click Start on BOOTP, DNS, and Telnet, or trigger all three from another laptop terminal:
-
+### Start All 3 Protocol Servers
+Open **`http://localhost:8000`** and click **Start** on **BOOTP**, **DNS**, and **Telnet**, or trigger all three from another laptop terminal:
+```bash
 curl -s -X POST http://localhost:8000/api/bootp/start-server
 curl -s -X POST http://localhost:8000/api/dns/start-server
 curl -s -X POST http://localhost:8000/api/telnet/start-server
-
+```
 
 Verify all ports are listening:
-
+```bash
 ss -ulnp | grep -E '10067|10053'
 ss -tlnp | grep -E '8000|10053|2323|2324'
+```
 
+---
 
-2. Client Commands from Other Terminals on the Same Laptop
+## 2. Client Commands from Other Terminals on the Same Laptop
 
-BOOTP (RFC 951)
-
+### BOOTP (RFC 951)
+```bash
 # Static MAC reservation (192.168.1.10)
 curl -s -X POST "http://localhost:8000/api/bootp/send-request?mac_address=aa:bb:cc:dd:ee:01"
 
 # Dynamic pool lease (192.168.1.100+)
 curl -s -X POST "http://localhost:8000/api/bootp/send-request?mac_address=02:42:ac:11:00:05"
+```
 
-
-DNS (RFC 1035 — UDP & TCP)
-
+### DNS (RFC 1035 — UDP & TCP)
+```bash
 python3 -m protocols.dns.client example.local --server 127.0.0.1 --port 10053 --type A
 python3 -m protocols.dns.client example.local --server 127.0.0.1 --port 10053 --type MX
 python3 -m protocols.dns.client www.example.local --server 127.0.0.1 --port 10053 --type CNAME
 python3 -m protocols.dns.client example.local --server 127.0.0.1 --port 10053 --type NS
 python3 -m protocols.dns.client example.local --server 127.0.0.1 --port 10053 --tcp
+```
 
-
-TELNET (RFC 854)
-
+### TELNET (RFC 854)
+```bash
 ./telnet/bin/telnet-client 127.0.0.1 2323
+```
+Inside the session, run `whoami`, `pwd`, `ls`, `echo $TERM`. Press `Ctrl + ]` then `quit` to exit.
 
+---
 
-Inside the session, run whoami, pwd, ls, echo $TERM. Press Ctrl + ] then quit to exit.
+## 3. Client Commands from Other Devices on the Same Wi-Fi
 
-3. Client Commands from Other Devices on the Same Wi-Fi
+Replace `<LAPTOP_IP>` with the Wi-Fi IP from `hostname -I`.
 
-Replace <LAPTOP_IP> with the Wi-Fi IP from hostname -I.
+### Web Visualizer (Any Phone or Laptop Browser)
+Open **`http://<LAPTOP_IP>:8000`** to view the live Dashboard, Sequence Diagram, Header Decoder, and `xterm.js` terminal.
 
-Web Visualizer (Any Phone or Laptop Browser)
-
-Open http://<LAPTOP_IP>:8000 to view the live Dashboard, Sequence Diagram, Header Decoder, and xterm.js terminal.
-
-Android Termux One-Time Package Setup
-
+### Android Termux One-Time Package Setup
+```bash
 pkg update -y && pkg install -y python busybox
+```
 
-
-BOOTP Broadcast (bootp_true_client.py)
-
-Create bootp_true_client.py on each client device:
-
+### BOOTP Broadcast (`bootp_true_client.py`)
+Create `bootp_true_client.py` on each client device:
+```bash
 cat << 'EOF' > bootp_true_client.py
 import os
 import socket
@@ -154,19 +154,18 @@ while time.time() < deadline:
         print("[Client] Timed out waiting for BOOTREPLY.")
         break
 EOF
-
+```
 
 Run from multiple devices:
-
+```bash
 python3 bootp_true_client.py 11:22:33:44:55:01
 python3 bootp_true_client.py 11:22:33:44:55:02
 python3 bootp_true_client.py aa:bb:cc:dd:ee:01   # Hits static reservation (.10)
+```
 
-
-DNS Query Script (dns_query_client.py)
-
-Create dns_query_client.py on Termux or another laptop (supports both UDP and TCP):
-
+### DNS Query Script (`dns_query_client.py`)
+Create `dns_query_client.py` on Termux or another laptop (supports both UDP and TCP):
+```bash
 cat << 'EOF' > dns_query_client.py
 import socket
 import struct
@@ -201,35 +200,30 @@ rcode = struct.unpack("!H", resp[2:4])[0] & 0x0F
 ancount = struct.unpack("!H", resp[6:8])[0]
 print(f"[{proto}] {domain} ({qtype_name}) -> {len(resp)} bytes | RCODE={rcode} | ANCOUNT={ancount}")
 EOF
-
+```
 
 Run from other devices:
-
+```bash
 python3 dns_query_client.py <LAPTOP_IP> example.local A
 python3 dns_query_client.py <LAPTOP_IP> example.local MX
 python3 dns_query_client.py <LAPTOP_IP> example.local A --tcp
+```
+*(Or on another Linux/macOS laptop with `dig`: `dig @<LAPTOP_IP> -p 10053 example.local A`.)*
 
+### TELNET Client
+* **Android (Termux):**
+  ```bash
+  busybox telnet <LAPTOP_IP> 2323
+  ```
+* **Another Linux / macOS Laptop:**
+  ```bash
+  telnet <LAPTOP_IP> 2323
+  ```
 
-(Or on another Linux/macOS laptop with dig: dig @<LAPTOP_IP> -p 10053 example.local A.)
+---
 
-TELNET Client
-
-Android (Termux):
-
-busybox telnet <LAPTOP_IP> 2323
-
-
-Another Linux / macOS Laptop:
-
-telnet <LAPTOP_IP> 2323
-
-
-4. Quick Troubleshooting
-
-Campus/Public Wi-Fi drops packets between devices: Router AP/Client Isolation is blocking peer-to-peer traffic. Connect your laptops to your phone's mobile hotspot instead.
-
-Connection refused on Telnet (2323): Ensure you clicked ▶ Start (:2323) in the Dashboard and run pkill -9 telnet-server before restarting python3 run.py if an old C process was stuck.
-
-Browser shows old UI: Hard-refresh with Ctrl + Shift + R.
-
-Android Termux cannot bind netlink socket: ip addr is blocked by Android 11+; check your phone's IP via Settings → Wi-Fi or python3 -c 'import socket; s=socket.socket(socket.AF_INET,socket.SOCK_DGRAM); s.connect(("8.8.8.8",80)); print(s.getsockname()[0])'.
+## 4. Quick Troubleshooting
+* **Campus/Public Wi-Fi drops packets between devices:** Router **AP/Client Isolation** is blocking peer-to-peer traffic. Connect your laptops to your **phone's mobile hotspot** instead.
+* **`Connection refused` on Telnet (`2323`):** Ensure you clicked **▶ Start (:2323)** in the Dashboard and run `pkill -9 telnet-server` before restarting `python3 run.py` if an old C process was stuck.
+* **Browser shows old UI:** Hard-refresh with **`Ctrl + Shift + R`**.
+* **Android Termux `cannot bind netlink socket`:** `ip addr` is blocked by Android 11+; check your phone's IP via **Settings → Wi-Fi** or `python3 -c 'import socket; s=socket.socket(socket.AF_INET,socket.SOCK_DGRAM); s.connect(("8.8.8.8",80)); print(s.getsockname()[0])'`.
